@@ -55,6 +55,10 @@ class UndetectedSelenium:
         # ua = UserAgent()
         # useragent = ua.firefox
         useragent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0'
+
+        # firefox_profile = webdriver.FirefoxProfile('C:\\Users\\HARITS\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\aew9g6cd.default')
+
+
         firefox_options = Options()
         firefox_options.page_load_strategy = 'eager'
         firefox_options.proxy = Proxy(
@@ -71,16 +75,22 @@ class UndetectedSelenium:
         # firefox_options.headless = True
         firefox_options.add_argument('--no-sandbox')
         firefox_options.set_preference("general.useragent.override", useragent)
-        firefox_options.set_preference("network.cookie.cookieBehavior", 2);
+        firefox_options.add_argument("-profile")
+        firefox_options.add_argument(r'C:\Users\HARITS\AppData\Roaming\Mozilla\Firefox\Profiles\aew9g6cd.default')
+        # firefox_options.set_preference("network.cookie.cookieBehavior", 2)
+        firefox_options.accept_insecure_certs = True
+        # firefox_options.set_preference("security.OCSP.enabled", 2)
+        # firefox_options.ignore_local_proxy_environment_variables()
 
         return firefox_options
 
 if __name__ == '__main__':
     s = Service('C:/geckodriver-v0.31.0-win64/geckodriver.exe')
     us = UndetectedSelenium()
-    proxy_lists = us.get_proxies()
-    selected_proxy = us.working_proxy(proxies=proxy_lists)
-    print(selected_proxy)
+    # proxy_lists = us.get_proxies()
+    # selected_proxy = us.working_proxy(proxies=proxy_lists)
+    # print(selected_proxy)
+    selected_proxy = ['77.91.101.191:11180', '89.29.122.17:7497', '37.18.73.94:5566']
     counter = 0
     proxy = random.choice(selected_proxy)
     # while 1:
@@ -99,7 +109,7 @@ if __name__ == '__main__':
     driver.set_page_load_timeout(25)
     driver.implicitly_wait(20)
     driver.set_script_timeout(20)
-    response = driver.get('https://reqbin.com/echo')
+    response = driver.get('https://www.showmyip.com')
     print(response)
 
 
