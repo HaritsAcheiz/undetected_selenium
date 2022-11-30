@@ -11,9 +11,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
-socket.setdefaulttimeout(180)
-
-
 class UndetectedSelenium:
     # Constructor
     def __init__(self, search_term=None):
