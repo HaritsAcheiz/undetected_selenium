@@ -10,7 +10,6 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
-import urllib.request , socket
 
 socket.setdefaulttimeout(180)
 
@@ -28,20 +27,23 @@ class UndetectedSelenium:
         soup = bs(response.content, 'html.parser').find_all("td", {"class": "blob-code blob-code-inner js-file-line"})
         for i in soup:
             proxies.append(i.text)
-
         return proxies
 
 
     def working_proxy(self, proxies):
-        url = 'https://www.pythontamer.com'
+        url = 'https://www.showmyip.com/'
         proxy = []
         for i, item in enumerate(proxies):
-            if i < 10:
-                formated_proxy = {"socks5://":item}
+            if i < len(proxies) and len(proxy) < 3:
+                formated_proxy = {
+                    "http": f"socks5://{item}",
+                    "https": f"socks5://{item}"
+                }
+
                 print(f'checking {formated_proxy}')
                 try:
                     with requests.Session() as session:
-                        response = session.get(url=url, proxies=formated_proxy, timeout=3)
+                        session.get(url=url, proxies=formated_proxy, timeout=3)
                     proxy.append(item)
                     print(f'{item} selected')
                 except Exception as e:
@@ -72,6 +74,7 @@ class UndetectedSelenium:
         # firefox_options.headless = True
         firefox_options.add_argument('--no-sandbox')
         firefox_options.set_preference("general.useragent.override", useragent)
+        firefox_options.set_preference("network.cookie.cookieBehavior", 2);
 
         return firefox_options
 
@@ -99,7 +102,7 @@ if __name__ == '__main__':
     driver.set_page_load_timeout(25)
     driver.implicitly_wait(20)
     driver.set_script_timeout(20)
-    response = driver.get('https://whatismyipaddress.com')
+    response = driver.get('https://reqbin.com/echo')
     print(response)
 
 
