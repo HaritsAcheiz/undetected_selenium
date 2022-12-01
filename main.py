@@ -77,10 +77,7 @@ class UndetectedSelenium:
         firefox_options.set_preference("general.useragent.override", useragent)
         firefox_options.add_argument("-profile")
         firefox_options.add_argument(r'C:\Users\HARITS\AppData\Roaming\Mozilla\Firefox\Profiles\aew9g6cd.default')
-        # firefox_options.set_preference("network.cookie.cookieBehavior", 2)
         firefox_options.accept_insecure_certs = True
-        # firefox_options.set_preference("security.OCSP.enabled", 2)
-        # firefox_options.ignore_local_proxy_environment_variables()
 
         return firefox_options
 
@@ -90,9 +87,21 @@ if __name__ == '__main__':
     # proxy_lists = us.get_proxies()
     # selected_proxy = us.working_proxy(proxies=proxy_lists)
     # print(selected_proxy)
-    selected_proxy = ['77.91.101.191:11180', '89.29.122.17:7497', '37.18.73.94:5566']
+    selected_proxy = [
+        "47.241.191.76:30022",
+        "47.241.191.76:30032",
+        "47.241.191.76:30069",
+        "47.241.191.76:30074",
+        "47.241.191.76:30077",
+        "8.214.112.193:30013",
+        "8.214.112.193:30014",
+        "8.214.112.193:30015",
+        "8.214.112.193:30019",
+        "8.214.112.193:30027"
+        ]
     counter = 0
     proxy = random.choice(selected_proxy)
+    # proxy = "114.10.31.156"
     # while 1:
     #     if counter % 5 == 0:
     #         proxy = random.choice(selected_proxy)
@@ -106,9 +115,6 @@ if __name__ == '__main__':
     # print(proxy)
     option = us.webdriver_setup(proxy=proxy)
     driver = webdriver.Firefox(service=s, options=option)
-    driver.set_page_load_timeout(25)
-    driver.implicitly_wait(20)
-    driver.set_script_timeout(20)
     response = driver.get('https://www.showmyip.com')
     print(response)
 
