@@ -1,3 +1,4 @@
+import time
 from random import choice
 from fake_useragent import UserAgent
 from selenium import webdriver
@@ -6,16 +7,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.proxy import ProxyType
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
 
-s = Service('C:/geckodriver-v0.31.0-win64/geckodriver.exe')
+# s = Service(r'C:/geckodriver-v0.32.0-win32/geckodriver.exe')
+# path = r"C:/geckodriver-v0.32.0-win32/geckodriver.exe"
 
 def rotate():
-    proxy_string = "147.135.65.90:40014 147.135.65.90:40015	51.81.109.223:40012	51.81.109.223:40013	51.81.109.223:40014"
-    proxy_list = proxy_string.split(sep="\t")
+    proxy_string = "47.241.191.76:40059 47.241.191.76:40060 8.214.112.193:40034"
+    proxy_list = proxy_string.split(sep=" ")
     proxy = choice(proxy_list)
+    # proxy = "147.135.65.90:40034"
     ua = UserAgent()
     useragent = ua.firefox
     firefox_options = Options()
+    firefox_options.binary = r'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
     firefox_options.proxy = Proxy(
         {
             'proxyType': ProxyType.MANUAL,
@@ -26,12 +31,19 @@ def rotate():
             'noProxy': ''
         }
     )
-    firefox_options.headless = True
+    # firefox_options.headless = True
     firefox_options.add_argument('--no-sandbox')
-    firefox_options.set_preference("general.useragent.override", useragent)
-    firefox_options.accept_insecure_certs = True
 
-    return webdriver.Firefox(service=s, options=firefox_options)
+    firefox_options.set_preference("general.useragent.override", useragent)
+
+    firefox_options.set_capability("acceptSslCerts", True)
+    firefox_options.set_capability("acceptInsecureCerts", True)
+    firefox_options.set_capability("ignore-certificate-errors", True)
+    # driver = webdriver.Firefox(service=s, options=firefox_options)
+    driver = webdriver.Firefox(options=firefox_options)
+    return driver
+
+    # return webdriver.Firefox(service=Service(GeckoDriverManager().install()), options=firefox_options)
 
 if __name__ == '__main__':
     counter = 1
@@ -41,10 +53,12 @@ if __name__ == '__main__':
             driver = rotate()
         else:
             pass
+        driver.delete_all_cookies()
         driver.fullscreen_window()
         driver.implicitly_wait(10)
-        driver.get('https://www.showmyip.com')
-        myIP = driver.find_element(By.CSS_SELECTOR, "section.container.clearfix > h2").text
+
+        driver.get('https://www.showmyip.com/')
+        myIP = driver.find_element(By.ID, "ipv4").text
         driver.get("https://www.whatismybrowser.com/")
         mybrowser = driver.find_element(By.CSS_SELECTOR, "div.string-major > a").text
         print(f"{counter} try")
