@@ -1,15 +1,13 @@
 from random import choice
 from fake_useragent import UserAgent
 from selenium import webdriver
-from selenium.webdriver import Proxy
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.proxy import ProxyType
 from selenium.webdriver.firefox.options import Options
 
-def rotate():
-    proxy_string = "147.135.65.90:10030	147.135.65.90:10032	51.81.109.223:10010"
-    proxy_list = proxy_string.split(sep="\t")
-    proxy = choice(proxy_list)
+proxy_string = "147.135.65.90:30384	147.135.65.90:30411	147.135.65.90:30500	147.135.65.90:30530	147.135.65.90:30545	51.81.109.223:30880	51.81.109.223:30885	51.81.109.223:30887	51.81.109.223:30890	51.81.109.223:30891"
+proxy_list = proxy_string.split(sep="\t")
+
+def webdriver_setup(proxy):
     ip, port = proxy.split(sep=':')
     ua = UserAgent()
     useragent = ua.firefox
@@ -31,25 +29,16 @@ def rotate():
     driver = webdriver.Firefox(options=firefox_options)
     return driver
 
-def reset_ip():
-    firefox_options = Options()
-    # firefox_options.binary = r'C:\Program Files (x86)\Mozilla Firefox\firefox.exe'
-    firefox_options.proxy = Proxy(
-        {
-            'proxyType': ProxyType.SYSTEM
-        }
-    )
-    driver = webdriver.Firefox(options=firefox_options)
-    return driver
 
 if __name__ == '__main__':
     counter = 1
-    while counter < 10:
-        # if counter % 2 == 0:
-        #     driver = rotate()
-        # else:
-        #     pass
-        driver = rotate()
+    proxy = choice(proxy_list)
+    while counter < 11:
+        if counter % 2 == 0:
+            proxy = choice(proxy_list)
+        else:
+            pass
+        driver = webdriver_setup(proxy)
         driver.delete_all_cookies()
         driver.fullscreen_window()
         driver.implicitly_wait(10)
