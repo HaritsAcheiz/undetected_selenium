@@ -1,4 +1,3 @@
-import time
 from random import choice
 import requests
 from bs4 import BeautifulSoup
@@ -108,8 +107,7 @@ def get_data(page=1, proxy=None):
             driver.get(url)
             WebDriverWait(driver,10).until(ec.presence_of_element_located((By.ID, 'global-enhancements-search-query')))
             driver.find_element(By.ID, 'global-enhancements-search-query').send_keys(search_term + Keys.RETURN)
-        # WebDriverWait(driver,10).until(ec.presence_of_element_located((By.ID, 'content')))
-            time.sleep(10)
+            WebDriverWait(driver,10).until(ec.presence_of_element_located((By.CSS_SELECTOR, 'div.wt-grid__item-xs-12.wt-pr-xs-1.wt-pl-xs-1.wt-pl-md-3.wt-pr-md-3')))
             query_url = driver.current_url
             driver.quit()
             break
@@ -120,7 +118,8 @@ def get_data(page=1, proxy=None):
             continue
     data = {'url': '', 'title': '', 'price': '', 'sales': ''}
     res = []
-    while True:
+    end = False
+    while end == False:
         if page % 3 == 0 :
             proxy = choice(proxy_list)
         else:
@@ -140,12 +139,13 @@ def get_data(page=1, proxy=None):
                 continue
 
         WebDriverWait(driver,10).until(ec.presence_of_element_located((By.ID, 'content')))
+        driver.find_element(By.CSS_SELECTOR, 'button.wt-btn.wt-btn--filled.wt-mb-xs-0').click()
         try:
             result = driver.find_elements(By.CSS_SELECTOR,
                                           'ol.wt-grid.wt-grid--block.wt-pl-xs-0.tab-reorder-container > li')
         except Exception as e:
             print(e)
-            break
+            end = True
 
         for i in result:
             try:
@@ -180,11 +180,11 @@ if __name__ == '__main__':
     search_term = 'necklace'
 
     # Get proxy list
-    proxy_list = choose_proxy(get_proxy())
-    print(proxy_list)
+    # proxy_list = choose_proxy(get_proxy())
+    # print(proxy_list)
 
     # random choice proxy from proxy list
-    # proxy_list = ['134.238.252.143:8080', '185.143.146.171:8080', '213.230.97.98:3128']
+    proxy_list = ['118.27.113.167:8080', '154.236.184.84:1981', '49.0.2.242:8090']
     proxy = choice(proxy_list)
 
     # Get data
