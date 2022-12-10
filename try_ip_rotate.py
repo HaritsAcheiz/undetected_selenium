@@ -32,15 +32,15 @@ def webdriver_setup(proxies = None):
     firefox_options.set_preference('network.proxy.socks', ip)
     firefox_options.set_preference('network.proxy.socks_port', int(port))
     firefox_options.set_preference('network.proxy.socks_version', 4)
-    # firefox_options.set_preference('network.proxy.socks_remote_dns', True)
-    # firefox_options.set_preference('network.proxy.http', ip)
-    # firefox_options.set_preference('network.proxy.http_port', int(port))
-    # firefox_options.set_preference('network.proxy.ssl', ip)
-    # firefox_options.set_preference('network.proxy.ssl_port', int(port))
+    firefox_options.set_preference('network.proxy.socks_remote_dns', True)
+    firefox_options.set_preference('network.proxy.http', ip)
+    firefox_options.set_preference('network.proxy.http_port', int(port))
+    firefox_options.set_preference('network.proxy.ssl', ip)
+    firefox_options.set_preference('network.proxy.ssl_port', int(port))
 
-    # firefox_options.set_capability("acceptSslCerts", True)
-    # firefox_options.set_capability("acceptInsecureCerts", True)
-    # firefox_options.set_capability("ignore-certificate-errors", False)
+    firefox_options.set_capability("acceptSslCerts", True)
+    firefox_options.set_capability("acceptInsecureCerts", True)
+    firefox_options.set_capability("ignore-certificate-errors", False)
 
     driver = webdriver.Firefox(options=firefox_options)
     return driver
@@ -63,7 +63,7 @@ def to_csv(datas=None, filepath='C:/project/etsy/result/result_sel.csv'):
 
 def get_proxy():
     with requests.Session() as s:
-        response = s.get('https://www.socks-proxy.net/')
+        response = s.get('https://www.us-proxy.org/')
     s.close()
     soup = BeautifulSoup(response.text, 'html.parser')
     list_data = soup.select('table.table.table-striped.table-bordered>tbody>tr')
@@ -72,6 +72,11 @@ def get_proxy():
         ip = i.select_one('tr > td:nth-child(1)').text
         port = i.select_one('tr > td:nth-child(2)').text
         proxy_data.append(f'{ip}:{port}')
+        # nation = i.select_one('tr > td:nth-child(3)').text
+        # if nation != 'RU':
+        #     proxy_data.append(f'{ip}:{port}')
+        # else:
+        #     continue
     return proxy_data
 
 def choose_proxy(proxies):
@@ -79,8 +84,8 @@ def choose_proxy(proxies):
     for i, item in enumerate(proxies):
         if i < len(proxies) and len(proxy) < 3:
             formated_proxy = {
-                "http": f"socks4://{item}",
-                "https": f"socks4://{item}"
+                "http": f"http://{item}",
+                "https": f"http://{item}"
             }
             print(f'checking {formated_proxy}')
             try:
@@ -98,9 +103,9 @@ def choose_proxy(proxies):
 
 if __name__ == '__main__':
     page = 249
-    proxy_list = choose_proxy(get_proxy())
-    print(proxy_list)
-    # proxy_list = ['125.27.10.84:4153', '78.130.151.74:1088', '138.186.133.161:4153']
+    # proxy_list = choose_proxy(get_proxy())
+    # print(proxy_list)
+    proxy_list = ['35.193.113.186:80', '216.176.187.99:8889', '75.126.253.8:8080']
     proxy = choice(proxy_list)
     # ip, port, user, pw = proxy.split(sep=':')
     ip, port = proxy.split(sep=':')
@@ -116,6 +121,7 @@ if __name__ == '__main__':
     sleep(10)
     query_url = driver.current_url
     search_url = f'{query_url}&ref=pagination&page={str(page)}'
+    driver.quit()
     data = {'url': '', 'title': '', 'price': '', 'sales': ''}
     res = []
     #
