@@ -20,7 +20,7 @@ def webdriver_setup(proxies = None):
     useragent = ua.firefox
     firefox_options = Options()
 
-    # firefox_options.headless = True
+    firefox_options.headless = True
     firefox_options.add_argument('--no-sandbox')
 
     firefox_options.set_preference("general.useragent.override", useragent)
@@ -98,12 +98,14 @@ def choose_proxy(proxies):
     return proxy
 
 def get_data(page=1, proxy=None):
+
+    # Searching page
     while True:
+        print(f"Searching for {search_term}...")
         try:
             driver = webdriver_setup(proxies=proxy)
             driver.delete_all_cookies()
             driver.fullscreen_window()
-            # driver.implicitly_wait(10)
             driver.get(url)
             WebDriverWait(driver,10).until(ec.presence_of_element_located((By.ID, 'global-enhancements-search-query')))
             driver.find_element(By.ID, 'global-enhancements-search-query').send_keys(search_term + Keys.RETURN)
@@ -112,79 +114,78 @@ def get_data(page=1, proxy=None):
             driver.quit()
             break
         except WebDriverException as e:
-            print(e)
+            print(f'Error while searching {search_term}, try to rotate proxy...')
             proxy = choice(proxy_list)
             driver.quit()
             continue
     data = {'url': '', 'title': '', 'price': '', 'sales': ''}
     res = []
     end = False
+
+    # Search result page
     while end == False:
         if page % 3 == 0 :
+            print(f'Rotating_proxy...')
             proxy = choice(proxy_list)
         else:
             pass
         search_url = f"{query_url}&ref=pagination&page={str(page)}"
+        print(f'Getting data from {search_url}...')
         while True:
             try:
                 driver = webdriver_setup(proxy)
                 driver.delete_all_cookies()
                 driver.fullscreen_window()
-                # driver.implicitly_wait(10)
                 driver.get(search_url)
                 break
             except WebDriverException as e:
-                print(e)
+                print(f'Error when getting data, try to rotate proxy...')
                 proxy = choice(proxy_list)
                 continue
 
         WebDriverWait(driver,10).until(ec.presence_of_element_located((By.ID, 'content')))
-        driver.find_element(By.CSS_SELECTOR, 'button.wt-btn.wt-btn--filled.wt-mb-xs-0').click()
-        try:
-            result = driver.find_elements(By.CSS_SELECTOR,
-                                          'ol.wt-grid.wt-grid--block.wt-pl-xs-0.tab-reorder-container > li')
-        except Exception as e:
-            print(e)
+        result = driver.find_elements(By.CSS_SELECTOR, 'ol.wt-grid.wt-grid--block.wt-pl-xs-0.tab-reorder-container > li')
+        if len(result) < 1:
+            print('Reach end of page')
             end = True
+        else:
+            for i in result:
+                try:
+                    data['url'] = i.find_element(By.CSS_SELECTOR, 'a.listing-link.wt-display-inline-block').get_attribute(
+                        'href')
+                except (TypeError, NoSuchElementException) as e:
+                    data['url'] = None
+                data['title'] = i.find_element(By.CSS_SELECTOR, 'h3.wt-text-caption.v2-listing-card__title').text
+                data['title'] = re.sub(r'\n +', '', data['title'])
+                data['price'] = i.find_element(By.CSS_SELECTOR,
+                                               'div.n-listing-card__price.wt-display-flex-xs.wt-align-items-center > p.wt-text-title-01.lc-price > span:nth-of-type(2)').text
+                data['price'] = re.sub(r'\D', '', data['price'])
+                try:
+                    data['sales'] = i.find_element(By.CSS_SELECTOR,
+                                                   'span.wt-text-caption.wt-text-gray.wt-display-inline-block.wt-nudge-l-3.wt-pr-xs-1').text
+                    data['sales'] = re.sub(r'\D', '', data['sales'])
+                except (AttributeError, NoSuchElementException) as e:
+                    data['sales'] = 0
+                res.append(data.copy())
 
-        for i in result:
-            try:
-                data['url'] = i.find_element(By.CSS_SELECTOR, 'a.listing-link.wt-display-inline-block').get_attribute(
-                    'href')
-            except (TypeError, NoSuchElementException) as e:
-                print(e)
-                break
-            data['title'] = i.find_element(By.CSS_SELECTOR, 'h3.wt-text-caption.v2-listing-card__title').text
-            data['title'] = re.sub(r'\n +', '', data['title'])
-            data['price'] = i.find_element(By.CSS_SELECTOR,
-                                           'div.n-listing-card__price.wt-display-flex-xs.wt-align-items-center > p.wt-text-title-01.lc-price > span:nth-of-type(2)').text
-            data['price'] = re.sub(r'\D', '', data['price'])
-            try:
-                data['sales'] = i.find_element(By.CSS_SELECTOR,
-                                               'span.wt-text-caption.wt-text-gray.wt-display-inline-block.wt-nudge-l-3.wt-pr-xs-1').text
-                data['sales'] = re.sub(r'\D', '', data['sales'])
-            except (AttributeError, NoSuchElementException) as e:
-                data['sales'] = 0
-            res.append(data.copy())
+            driver.quit()
+            print(f'\n{len(res)} products collected by selenium from page {page}')
+            page += 1
 
-        driver.quit()
-        print(f'\n{len(res)} products collected by selenium from page {page}')
-        page += 1
+    print('Success getting all data')
     return res
 
 
 if __name__ == '__main__':
     # Define variable input
-    page = 249
+    page = 251
     url = 'https://www.etsy.com'
-    search_term = 'necklace'
+    search_term = 'toys'
 
     # Get proxy list
-    # proxy_list = choose_proxy(get_proxy())
-    # print(proxy_list)
+    proxy_list = choose_proxy(get_proxy())
 
     # random choice proxy from proxy list
-    proxy_list = ['118.27.113.167:8080', '154.236.184.84:1981', '49.0.2.242:8090']
     proxy = choice(proxy_list)
 
     # Get data
